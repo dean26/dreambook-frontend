@@ -1,15 +1,24 @@
 <template>
   <div class="w-full md:w-1/2 flex flex-col">
     <div class="flex justify-center md:justify-start pt-12 md:pl-12 md:-mb-24">
-      <a href="#" class="bg-black text-white font-bold text-xl p-4">Logo</a>
+      <span
+        href="#"
+        class="bg-black text-white font-bold text-xl p-4"
+      >Lucas DreamBook</span>
     </div>
 
     <div
       class="flex flex-col justify-center md:justify-start my-auto pt-8 md:pt-0 px-8 md:px-24 lg:px-32"
     >
-      <p class="text-center text-3xl">
-        Welcome.
-      </p>
+      <div
+        v-if="error"
+        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+        role="alert"
+      >
+        <strong class="font-bold">Wystąpił błąd</strong>
+        <span class="block sm:inline">{{ error }}</span>
+      </div>
+
       <form
         class="flex flex-col pt-3 md:pt-8"
         method="post"
@@ -52,11 +61,13 @@
 export default {
   name: 'LoginPage',
   layout: 'login',
+  middleware: false,
 
   data () {
     return {
       email: '',
-      password: ''
+      password: '',
+      error: ''
     }
   },
 
@@ -66,6 +77,7 @@ export default {
 
   methods: {
     async login () {
+      this.error = ''
       try {
         await this.$auth.loginWith('laravelSanctum', {
           data: {
@@ -75,7 +87,7 @@ export default {
         })
         this.$router.push('/')
       } catch (err) {
-        console.log(err.message)
+        this.error = err.response?.data?.message
       }
     }
   }
