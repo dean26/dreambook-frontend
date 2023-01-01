@@ -105,10 +105,12 @@
               </div>
             </td>
             <td class="px-6 py-4 text-right">
-              <a
-                href="#"
+              <button
                 class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-              >Edit</a>
+                @click="deleteDream(dream.id)"
+              >
+                Delete
+              </button>
             </td>
           </tr>
         </tbody>
@@ -149,6 +151,14 @@ export default {
         this.dreams = await this.$axios.$get(`/api/dreams?query=${value}`)
       } else {
         this.dreams = await this.$axios.$get('/api/dreams')
+      }
+    },
+    async deleteDream (id) {
+      if (confirm('Are you sure?')) {
+        const queryString = window.location.search
+        const urlParams = new URLSearchParams(queryString)
+        await this.$axios.$delete(`/api/dreams/${id}`)
+        this.dreams = await this.$axios.$get(`/api/dreams?${urlParams}`)
       }
     }
   }
