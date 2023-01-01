@@ -127,10 +127,14 @@ export default {
   async asyncData (context) {
     const page = context.query.page ?? 1
     const tag = context.query.tag ?? null
+    const query = context.query.query ?? null
 
     let searchParams = `?page=${page}`
     if (tag) {
       searchParams += `&tag=${tag}`
+    }
+    if (query) {
+      searchParams += `&query=${query}`
     }
 
     const dreams = await context.$axios.$get(`/api/dreams${searchParams}`)
