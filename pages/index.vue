@@ -42,13 +42,15 @@
               <div class="flex items-center">
                 <input
                   id="checkbox-all-search"
+                  v-model="allSelected"
                   type="checkbox"
                   class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  @click="toggleSelect"
                 >
                 <label
                   for="checkbox-all-search"
                   class="sr-only"
-                >checkbox</label>
+                >select all</label>
               </div>
             </th>
             <th scope="col" class="px-6 py-3">
@@ -72,6 +74,8 @@
               <div class="flex items-center">
                 <input
                   id="checkbox-table-search-1"
+                  v-model="selected"
+                  :value="dream.id"
                   type="checkbox"
                   class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                 >
@@ -114,6 +118,20 @@
             </td>
           </tr>
         </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">
+              <div class="p-2">
+                <button
+                  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  @click="deleteSelected()"
+                >
+                  Delete Selected
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tfoot>
       </table>
     </div>
     <Pagination v-if="dreams.meta" :meta="dreams.meta" />
@@ -142,7 +160,9 @@ export default {
   },
   data () {
     return {
-      queryString: ''
+      queryString: '',
+      allSelected: false,
+      selected: []
     }
   },
   watch: {
@@ -159,10 +179,33 @@ export default {
     },
     async deleteDream (id) {
       if (confirm('Are you sure?')) {
-        const queryString = window.location.search
-        const urlParams = new URLSearchParams(queryString)
         await this.$axios.$delete(`/api/dreams/${id}`)
-        this.dreams = await this.$axios.$get(`/api/dreams?${urlParams}`)
+        this.refreshDreams()
+      }
+    },
+    async deleteSelected () {
+      if (this.selected.length > 0) {
+        if (confirm('Are you sure?')) {
+          await this.$axios.$delete('/api/dreams/destroy_many', {
+            data: { ids: this.selected }
+          })
+          this.refreshDreams()
+        }
+      }
+    },
+    async refreshDreams () {
+      const queryString = window.location.search
+      const urlParams = new URLSearchParams(queryString)
+      this.dreams = await this.$axios.$get(`/api/dreams?${urlParams}`)
+    },
+    toggleSelect () {
+      this.selected = []
+      if (!this.allSelected) {
+        const selectIds = []
+        this.dreams.data.forEach(function (dream) {
+          selectIds.push(dream.id)
+        })
+        this.selected = selectIds
       }
     }
   }
